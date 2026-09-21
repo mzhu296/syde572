@@ -64,7 +64,17 @@
     .nav-inner a { flex: 0 0 auto; padding: 7px 12px; border-radius: 999px; color: #43546a; font-size: .85rem; text-decoration: none; }
     .nav-inner a:hover { color: var(--navy); background: var(--teal-soft); }
 
-    main { padding: 34px 0 72px; }
+    main { display: flex; flex-direction: column; padding: 34px 0 72px; }
+    main > * { order: 1; }
+    #part1-handwritten { order: 2; }
+    #numerical { order: 3; }
+    #examples { order: 4; }
+    #part-two { order: 5; }
+    #part2-data, #part2-line, #part2-parabola { order: 6; }
+    #part2-handwritten { order: 7; }
+    #part2-numerical { order: 8; }
+    #part2-comparison { order: 9; }
+    #part2-relationship { order: 10; }
     .section {
       margin: 22px 0;
       padding: clamp(24px, 4vw, 46px);
@@ -115,6 +125,11 @@
     .part-divider p:last-child { margin-bottom: 0; color: #c9d8e7; }
     .part-two-loading { padding: 26px; color: var(--muted); text-align: center; }
     .pdf-frame { width: 100%; height: min(78vh, 900px); min-height: 520px; border: 1px solid var(--line); border-radius: 12px; background: #f7f9fb; }
+    .code-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 8px; }
+    .code-button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid #b8d9d5; border-radius: 10px; color: #0d625d; background: var(--teal-soft); text-decoration: none; }
+    .code-button:hover { color: white; border-color: var(--teal); background: var(--teal); }
+    .code-button.download { color: #7a4d12; border-color: #efd09a; background: #fff7e7; }
+    .code-button.download:hover { color: white; border-color: var(--orange); background: var(--orange); }
 
     @media (max-width: 760px) {
       .hero { padding-top: 46px; }
@@ -170,14 +185,14 @@
 
 <nav class="site-nav" aria-label="Assignment sections">
   <div class="nav-inner">
-    <a href="#problem">Problem</a>
-    <a href="#analytical">Analytical method</a>
-    <a href="#numerical">Numerical methods</a>
-    <a href="#examples">Other functions</a>
-    <a href="#comparison">Results</a>
-    <a href="#part-two">Part Two: Function Fitting</a>
-    <a href="./part1/part1.pdf">Handwritten solution ↗</a>
-    <a href="./part2/part2.pdf">Part Two PDF ↗</a>
+    <a href="#problem">Part 1 Analysis</a>
+    <a href="#part1-handwritten">Part 1 Handwritten</a>
+    <a href="#numerical">Part 1 Code &amp; Plots</a>
+    <a href="#examples">Four Functions</a>
+    <a href="#part2-data">Part 2 Analysis</a>
+    <a href="#part2-handwritten">Part 2 Handwritten</a>
+    <a href="#part2-numerical">Part 2 Code &amp; Plots</a>
+    <a href="#part2-comparison">MSE Results</a>
   </div>
 </nav>
 
@@ -888,6 +903,17 @@
 
 <!-- NUMERICAL METHODS -->
 
+<section class="section" id="part1-handwritten">
+  <h2>Part One Handwritten Analysis</h2>
+  <p>
+    The handwritten calculus solution for the five supplied points is embedded
+    below. <a href="./part1/part1.pdf">Open or download part1.pdf</a>.
+  </p>
+  <object class="pdf-frame" data="./part1/part1.pdf" type="application/pdf" aria-label="Handwritten Part One analytical solution">
+    <p>Your browser cannot display the PDF inline. <a href="./part1/part1.pdf">Open part1.pdf</a>.</p>
+  </object>
+</section>
+
 <div class="section" id="numerical">
 
   <h2>Numerical Method Visualizations</h2>
@@ -1023,10 +1049,12 @@
     and the analytical solution.
   </div>
 
-  <p class="small">
-    Source code: <a href="./part1/A1.py">Newton-Raphson implementation</a> ·
-    <a href="./part1/A2.py">Golden-section implementation</a>
-  </p>
+  <div class="code-actions" aria-label="Part One numerical source code">
+    <a class="code-button" href="./part1/A1.py">View Newton code</a>
+    <a class="code-button download" href="./part1/A1.py" download>Download Newton code</a>
+    <a class="code-button" href="./part1/A2.py">View golden-section code</a>
+    <a class="code-button download" href="./part1/A2.py" download>Download golden-section code</a>
+  </div>
 
   <p>
     The numbered orange markers show the successive numerical candidates.
@@ -1131,6 +1159,12 @@
     The handwritten analytical solution for the original parabola is available
     as <a href="./part1/part1.pdf">part1.pdf</a>.
   </p>
+
+  <div class="code-actions" aria-label="Non-polynomial example source code">
+    <a class="code-button" href="./part1/non_polynomial_examples.py">View example code</a>
+    <a class="code-button download" href="./part1/non_polynomial_examples.py" download>Download example code</a>
+    <a class="code-button download" href="./part1/media/non_polynomial_method_comparison.csv" download>Download comparison data</a>
+  </div>
 
 </div>
 
@@ -1699,7 +1733,7 @@
   </section>
 
   <section class="section" id="part2-comparison">
-    <h2>4. Final Comparison</h2>
+    <h2>5. Final MSE Comparison</h2>
     <table>
       <thead>
         <tr><th>Model</th><th>Best-Fit Equation</th><th>SSE</th><th>MSE</th></tr>
@@ -1722,13 +1756,10 @@
 
     <p>The parabola has a much smaller MSE for these four points because the quadratic model has an additional parameter and better matches the curvature present in the data.</p>
 
-    <div class="note">
-      For the assignment's numerical section, this analytical least-squares solution can be used as the reference result when checking the multivariate Newton–Raphson implementation.
-    </div>
   </section>
 
   <section class="section" id="part2-numerical">
-    <h2>5. Coordinate-Wise Newton-Raphson</h2>
+    <h2>4. Coordinate-Wise Newton-Raphson</h2>
 
     <p>
       The numerical routine begins with every coefficient equal to zero. During
@@ -1753,6 +1784,38 @@
       \]
     </div>
 
+    <h3>4.1 Alternating updates for the line</h3>
+    <p>
+      Starting from \(c_0=c_1=0\), first optimize the intercept while holding
+      the slope fixed. Then optimize the slope using the newly updated
+      intercept:
+    </p>
+    <div class="equation">
+      \[
+      \boxed{c_0\leftarrow\frac{26-12c_1}{8}}
+      \qquad\text{then}\qquad
+      \boxed{c_1\leftarrow\frac{62-12c_0}{28}}.
+      \]
+    </div>
+
+    <h3>4.2 Alternating updates for the parabola</h3>
+    <p>
+      The same procedure is applied sequentially to the intercept, linear
+      coefficient, and quadratic coefficient. Every update uses the newest
+      coefficient values from the current sweep:
+    </p>
+    <div class="equation">
+      \[
+      c_0\leftarrow\frac{26-12c_1-28c_2}{8},
+      \]
+      \[
+      c_1\leftarrow\frac{62-12c_0-72c_2}{28},
+      \]
+      \[
+      c_2\leftarrow\frac{166-28c_0-72c_1}{196}.
+      \]
+    </div>
+
     <p>
       A sweep stops when the largest coefficient change is below
       \(10^{-10}\). The complete implementation is available in
@@ -1760,7 +1823,12 @@
       are available as CSV files below.
     </p>
 
-    <h3>5.1 Line-fit iterations</h3>
+    <div class="code-actions" aria-label="Part Two numerical source code">
+      <a class="code-button" href="./part2/part2_newton.py">View Part Two code</a>
+      <a class="code-button download" href="./part2/part2_newton.py" download>Download Part Two code</a>
+    </div>
+
+    <h3>4.3 Line-fit iterations</h3>
     <div class="plot-grid">
       <figure class="plot-card wide">
         <figcaption>Line fit and MSE convergence</figcaption>
@@ -1785,7 +1853,7 @@
     </div>
     <p class="small"><a href="./part2/media/line_newton_iterations.csv">Download all 56 recorded line-fit states</a>.</p>
 
-    <h3>5.2 Parabola-fit iterations</h3>
+    <h3>4.4 Parabola-fit iterations</h3>
     <div class="plot-grid">
       <figure class="plot-card wide">
         <figcaption>Parabola fit and MSE convergence</figcaption>
@@ -1818,7 +1886,7 @@
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" id="part2-relationship">
     <h2>6. Key Relationship</h2>
     <p>The derivative and matrix approaches are equivalent:</p>
     <div class="equation">
