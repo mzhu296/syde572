@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="IEEE-inspired review copy of SYDE 572 Assignment 1: distance minimization and least-squares function fitting.">
+  <title>SYDE 572 Assignment 1 — IEEE Review Copy</title>
+  <style>
+    :root {
+      --ink: #111;
+      --muted: #4b5563;
+      --rule: #9ca3af;
+      --light-rule: #d1d5db;
+      --accent: #075985;
+      --paper: #fff;
+      --canvas: #e9edf1;
+      --soft: #f4f7f9;
+      --result: #eef6fa;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: "Times New Roman", Times, serif;
+      font-size: 16px;
+      line-height: 1.52;
+    }
+    a { color: var(--accent); text-underline-offset: .16em; }
+    a:hover { color: #9a3412; }
+    img { max-width: 100%; }
+
+    .review-bar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: .65rem max(1rem, calc((100% - 1040px) / 2));
+      border-bottom: 1px solid #cbd5e1;
+      background: rgba(248, 250, 252, .96);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: .86rem;
+      backdrop-filter: blur(10px);
+    }
+    .review-bar strong { letter-spacing: .04em; text-transform: uppercase; }
+    .review-bar nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .75rem; }
+    .review-bar a { font-weight: 700; text-decoration: none; }
+
+    .paper {
+      width: min(1040px, calc(100% - 2rem));
+      margin: 2rem auto 4rem;
+      padding: clamp(2rem, 6vw, 4.75rem);
+      background: var(--paper);
+      box-shadow: 0 16px 44px rgba(15, 23, 42, .14);
+    }
+    .paper-header { text-align: center; }
+    .paper-header .course {
+      margin: 0 0 .75rem;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 760px;
+      margin: 0 auto .85rem;
+      font-size: clamp(1.85rem, 4.4vw, 2.7rem);
+      font-weight: 400;
+      line-height: 1.12;
+    }
+    .author-line { margin: 0; font-size: 1rem; }
+    .version-line { margin: .25rem 0 2rem; color: var(--muted); font-size: .9rem; }
+
+    .abstract {
+      max-width: 820px;
+      margin: 0 auto 2rem;
+      padding: 1rem 1.25rem;
+      border-top: 1.5px solid var(--ink);
+      border-bottom: 1px solid var(--rule);
+      text-align: justify;
+    }
+    .abstract p { margin: 0 0 .6rem; text-indent: 0; }
+    .abstract p:last-child { margin-bottom: 0; }
+    .label { font-variant: small-caps; font-weight: 700; letter-spacing: .04em; }
+
+    .contents {
+      margin: 2rem 0 2.5rem;
+      padding: 1rem 1.2rem;
+      border-left: 3px solid var(--accent);
+      background: var(--soft);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: .9rem;
+    }
+    .contents strong { display: block; margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .06em; }
+    .contents ol { columns: 2; margin: 0; padding-left: 1.3rem; }
+    .contents li { margin: .25rem 0; padding-right: 1rem; break-inside: avoid; }
+    .contents a { color: #1f2937; }
+
+    section { margin: 0 0 2.5rem; scroll-margin-top: 5rem; }
+    h2, h3, h4 { break-after: avoid; }
+    h2 {
+      margin: 2.8rem 0 1rem;
+      border-bottom: 1px solid var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1.08rem;
+      line-height: 1.35;
+      letter-spacing: .045em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    h3 {
+      margin: 1.8rem 0 .55rem;
+      font-size: 1rem;
+      font-style: italic;
+      font-weight: 700;
+    }
+    h4 { margin: 1.2rem 0 .35rem; font-size: .95rem; }
+    section > p, .prose > p {
+      margin: .55rem 0;
+      text-align: justify;
+      text-indent: 1.35rem;
+    }
+    section > p.no-indent, .no-indent { text-indent: 0; }
+
+    .equation {
+      margin: 1rem 0;
+      padding: .35rem 1rem;
+      overflow-x: auto;
+      border-left: 2px solid var(--rule);
+      font-size: 1.02rem;
+      text-align: center;
+    }
+    .result-box {
+      margin: 1rem 0;
+      padding: .8rem 1rem;
+      border-top: 1.5px solid var(--accent);
+      border-bottom: 1px solid var(--accent);
+      background: var(--result);
+      text-align: center;
+    }
+    .method-note {
+      margin: 1rem 0;
+      padding: .75rem 1rem;
+      border-left: 3px solid #a16207;
+      background: #fffbeb;
+      text-align: justify;
+    }
+
+    .table-wrap { margin: 1.25rem 0 1.8rem; overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-top: 1.8px solid #000;
+      border-bottom: 1.8px solid #000;
+      font-family: "Times New Roman", Times, serif;
+      font-size: .875rem;
+      line-height: 1.3;
+      font-variant-numeric: tabular-nums;
+    }
+    caption {
+      padding: 0 0 .5rem;
+      font-size: .82rem;
+      line-height: 1.25;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    thead { border-bottom: 1px solid #000; }
+    th, td { padding: .42rem .52rem; text-align: center; vertical-align: middle; }
+    th { font-weight: 700; }
+    tbody tr + tr { border-top: .5px solid var(--light-rule); }
+    tbody tr:last-child { font-weight: 600; }
+
+    .figure-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; margin: 1.5rem 0 2rem; }
+    figure { margin: 0; break-inside: avoid; }
+    figure.wide { grid-column: 1 / -1; }
+    figure img { display: block; width: 100%; height: auto; border: 1px solid var(--light-rule); background: white; }
+    figcaption {
+      margin-top: .48rem;
+      font-size: .86rem;
+      line-height: 1.35;
+      text-align: justify;
+    }
+    .fig-label { font-variant: small-caps; font-weight: 700; }
+
+    .downloads {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .55rem;
+      margin: 1rem 0 1.4rem;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: .82rem;
+    }
+    .downloads a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.25rem;
+      padding: .42rem .7rem;
+      border: 1px solid #94a3b8;
+      background: #f8fafc;
+      color: #0f172a;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .downloads a:hover { border-color: var(--accent); color: var(--accent); }
+    .pdf-frame { width: 100%; min-height: 620px; border: 1px solid var(--rule); background: var(--soft); }
+    .small { color: var(--muted); font-size: .88rem; }
+    .references { padding-left: 1.4rem; font-size: .92rem; }
+    .references li { margin-bottom: .55rem; }
+
+    @media (max-width: 760px) {
+      .review-bar { align-items: flex-start; flex-direction: column; }
+      .review-bar nav { justify-content: flex-start; }
+      .paper { width: 100%; margin: 0; padding: 1.5rem 1rem 3rem; box-shadow: none; }
+      .contents ol { columns: 1; }
+      .figure-grid { grid-template-columns: 1fr; }
+      figure.wide { grid-column: auto; }
+      .pdf-frame { min-height: 480px; }
+      th, td { min-width: 6.2rem; }
+    }
+
+    @media print {
+      @page { size: letter; margin: .65in; }
+      body { background: white; font-size: 10pt; line-height: 1.28; }
+      .review-bar, .contents, .downloads, .pdf-section { display: none !important; }
+      .paper { width: auto; margin: 0; padding: 0; box-shadow: none; }
+      h1 { font-size: 20pt; }
+      h2 { font-size: 11pt; }
+      section { margin-bottom: 1.3rem; }
+      section > p, .prose > p { orphans: 3; widows: 3; }
+      .figure-grid { display: block; }
+      figure { margin: 0 0 1rem; page-break-inside: avoid; }
+      table { font-size: 8pt; }
+      .table-wrap, .result-box, .equation { page-break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <div class="review-bar">
+    <strong>IEEE-style review copy</strong>
+    <nav aria-label="Review page links">
+      <a href="./index.html">Current webpage</a>
+      <a href="#part-one">Part I</a>
+      <a href="#part-two">Part II</a>
+      <a href="#files">Files</a>
+    </nav>
+  </div>
+
+  <main class="paper">
+    <header class="paper-header">
+      <p class="course">SYDE 572 · Introduction to Pattern Recognition · Assignment 1</p>
+      <h1>Distance Minimization and Least-Squares Function Fitting Using Analytical and Numerical Methods</h1>
+      <p class="author-line">Assignment Report</p>
+      <p class="version-line">IEEE-inspired layout for design review</p>
+    </header>
+
+    <div class="abstract">
+      <p><span class="label">Abstract—</span>This report studies two optimization tasks. Part I finds the shortest Euclidean distance from five supplied points to the parabola \(y=x^2+5\), using an analytical stationary-point condition, Newton–Raphson iteration, and golden-section search. The methods are then tested on exponential, logarithmic, rational, and radical functions. Part II fits a line and a parabola to four observations by minimizing the mean squared error. Analytical normal equations are compared with coordinate-wise Newton–Raphson updates that optimize one coefficient at a time while holding the other coefficients fixed.</p>
+      <p><span class="label">Index Terms—</span>Newton–Raphson, golden-section search, squared distance, least squares, mean squared error, coordinate-wise optimization.</p>
+    </div>
+
+    <nav class="contents" aria-label="Table of contents">
+      <strong>Contents</strong>
+      <ol>
+        <li><a href="#part-one">Part I: Distance minimization</a></li>
+        <li><a href="#p1-analytical">Analytical formulation</a></li>
+        <li><a href="#p1-numerical">Numerical methods</a></li>
+        <li><a href="#p1-functions">Additional functions</a></li>
+        <li><a href="#part-two">Part II: Function fitting</a></li>
+        <li><a href="#p2-analytical">Analytical fits</a></li>
+        <li><a href="#p2-newton">Coordinate-wise Newton method</a></li>
+        <li><a href="#files">Supporting files</a></li>
+      </ol>
+    </nav>
+
+    <section id="part-one">
+      <h2>I. Part I — Shortest Distance to a Function</h2>
+      <p class="no-indent">The first task considers the five points \((0,0)\), \((-4,0)\), \((-8,0)\), \((2,0)\), and \((6,0)\). For each supplied point, the objective is to locate the point on \(f(x)=x^2+5\) that gives the minimum Euclidean distance. Squared distance is used throughout because the square-root function is strictly increasing and therefore does not change the location of the minimizer.</p>
+    </section>
+
+    <section id="p1-analytical">
+      <h2>II. Analytical Formulation</h2>
+      <p class="no-indent">Let the supplied point be \(P=(a,0)\) and an arbitrary point on the parabola be \(Q=(x,x^2+5)\). The squared-distance objective is</p>
+      <div class="equation">
+        \[D(x)=(x-a)^2+(x^2+5)^2.\]
+      </div>
+      <p>Differentiation gives \(D'(x)=4x^3+22x-2a\). Every candidate minimizer therefore satisfies \(2x^3+11x-a=0\). Moreover, \(D''(x)=12x^2+22>0\) for every real \(x\), so the objective is strictly convex and each real stationary point is the unique global minimizer.</p>
+
+      <div class="table-wrap">
+        <table>
+          <caption>Table I. Analytical and numerical distance results for \(y=x^2+5\)</caption>
+          <thead><tr><th>Given point \(P\)</th><th>Optimal \(x^*\)</th><th>Closest point \(Q\)</th><th>Minimum distance</th></tr></thead>
+          <tbody>
+            <tr><td>\((0,0)\)</td><td>0.00000</td><td>\((0.00000,5.00000)\)</td><td>5.00000</td></tr>
+            <tr><td>\((-4,0)\)</td><td>−0.35547</td><td>\((-0.35547,5.12636)\)</td><td>6.28985</td></tr>
+            <tr><td>\((-8,0)\)</td><td>−0.67208</td><td>\((-0.67208,5.45169)\)</td><td>9.13342</td></tr>
+            <tr><td>\((2,0)\)</td><td>0.18074</td><td>\((0.18074,5.03267)\)</td><td>5.35140</td></tr>
+            <tr><td>\((6,0)\)</td><td>0.51990</td><td>\((0.51990,5.27030)\)</td><td>7.60313</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="p1-numerical">
+      <h2>III. Part I Numerical Methods</h2>
+      <h3>A. Newton–Raphson Method</h3>
+      <p class="no-indent">For a general function \(y=f(x)\) and point \((x_0,y_0)\), define \(D(x)=(x-x_0)^2+[f(x)-y_0]^2\). Its first two derivatives are</p>
+      <div class="equation">
+        \[D'(x)=2(x-x_0)+2[f(x)-y_0]f'(x),\]
+        \[D''(x)=2+2[f'(x)]^2+2[f(x)-y_0]f''(x).\]
+      </div>
+      <p>The next iterate is \(x_{k+1}=x_k-D'(x_k)/D''(x_k)\). For the supplied parabola, the program starts from \(x_0=0\), stops when \(|x_{k+1}-x_k|&lt;10^{-7}\), and imposes a 100-iteration limit. A curvature guard stops the calculation if \(|D''(x_k)|&lt;10^{-12}\).</p>
+
+      <div class="table-wrap">
+        <table>
+          <caption>Table II. Representative Newton–Raphson iterations for \(P=(-4,0)\)</caption>
+          <thead><tr><th>\(k\)</th><th>\(x_k\)</th><th>\(D(x_k)\)</th><th>\(D'(x_k)\)</th><th>\(D''(x_k)\)</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>0.000000</td><td>41.000000</td><td>8.000000</td><td>22.000000</td></tr>
+            <tr><td>1</td><td>−0.363636</td><td>39.562940</td><td>−0.192337</td><td>23.586777</td></tr>
+            <tr><td>2</td><td>−0.355482</td><td>39.562155</td><td>−0.000288</td><td>23.516409</td></tr>
+            <tr><td>3</td><td>−0.355470</td><td>39.562155</td><td>−6.40×10<sup>−10</sup></td><td>23.516304</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>B. Golden-Section Search</h3>
+      <p class="no-indent">Golden-section search needs no derivatives. Starting with a unimodal bracket \([a,b]=[-10,10]\), it evaluates \(x_1=a+r(b-a)\) and \(x_2=b-r(b-a)\), where \(r=(3-\sqrt5)/2\approx0.381966\). If \(D(x_1)&lt;D(x_2)\), the interval becomes \([a,x_2]\); otherwise it becomes \([x_1,b]\). The calculation terminates when \(|b-a|&lt;10^{-7}\), or after 1000 reductions.</p>
+
+      <div class="table-wrap">
+        <table>
+          <caption>Table III. Selected golden-section reductions for \(P=(-4,0)\)</caption>
+          <thead><tr><th>\(k\)</th><th>\(a\)</th><th>\(b\)</th><th>\(x_1\)</th><th>\(x_2\)</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>−10.000000</td><td>10.000000</td><td>−2.360680</td><td>2.360680</td></tr>
+            <tr><td>1</td><td>−10.000000</td><td>2.360680</td><td>−5.278640</td><td>−2.360680</td></tr>
+            <tr><td>10</td><td>−0.456781</td><td>−0.294169</td><td>−0.394669</td><td>−0.356281</td></tr>
+            <tr><td>20</td><td>−0.356281</td><td>−0.354959</td><td>−0.355776</td><td>−0.355464</td></tr>
+            <tr><td>39</td><td>−0.355470</td><td>−0.355470</td><td>−0.355470</td><td>−0.355470</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="method-note"><strong>Method comparison.</strong> Newton–Raphson converges quickly when reliable first and second derivatives are available. Golden-section search is slower but derivative-free and maintains a containing interval. Both methods reproduce the analytical results in Table I to five decimal places.</div>
+
+      <div class="downloads" aria-label="Part I source files">
+        <a href="./part1/A1.py">View Newton code</a>
+        <a href="./part1/A1.py" download>Download Newton code</a>
+        <a href="./part1/A2.py">View golden-section code</a>
+        <a href="./part1/A2.py" download>Download golden-section code</a>
+      </div>
+
+      <div class="figure-grid">
+        <figure>
+          <img src="./part1/media/newton_steps.png" alt="Newton-Raphson intermediate steps for the five supplied points" loading="lazy">
+          <figcaption><span class="fig-label">Fig. 1.</span> Newton–Raphson intermediate steps. Each panel identifies the supplied point, candidate points, final closest point, and distance equation.</figcaption>
+        </figure>
+        <figure>
+          <img src="./part1/media/golden_section_steps.png" alt="Golden-section intermediate steps for the five supplied points" loading="lazy">
+          <figcaption><span class="fig-label">Fig. 2.</span> Golden-section interval reduction for the five supplied points, plotted on the same coordinate scale as Fig. 1.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="p1-functions">
+      <h2>IV. Additional Non-Polynomial Functions</h2>
+      <p class="no-indent">The same five supplied points were tested against four additional function families: exponential, logarithmic, rational (variable in the denominator), and radical. Separate figures are retained for Newton–Raphson and golden-section search so that the behavior of each numerical method remains visible. The shared implementation and complete numerical comparison are available below.</p>
+      <div class="downloads">
+        <a href="./part1/non_polynomial_examples.py">View example code</a>
+        <a href="./part1/non_polynomial_examples.py" download>Download example code</a>
+        <a href="./part1/media/non_polynomial_method_comparison.csv" download>Download comparison table</a>
+      </div>
+
+      <div class="figure-grid">
+        <figure><img src="./part1/media/exponential_newton_steps.png" alt="Exponential-function Newton-Raphson results" loading="lazy"><figcaption><span class="fig-label">Fig. 3.</span> Exponential-function examples solved with Newton–Raphson.</figcaption></figure>
+        <figure><img src="./part1/media/exponential_golden_section_steps.png" alt="Exponential-function golden-section results" loading="lazy"><figcaption><span class="fig-label">Fig. 4.</span> Exponential-function examples solved with golden-section search.</figcaption></figure>
+        <figure><img src="./part1/media/logarithmic_newton_steps.png" alt="Logarithmic-function Newton-Raphson results" loading="lazy"><figcaption><span class="fig-label">Fig. 5.</span> Logarithmic-function examples solved with Newton–Raphson.</figcaption></figure>
+        <figure><img src="./part1/media/logarithmic_golden_section_steps.png" alt="Logarithmic-function golden-section results" loading="lazy"><figcaption><span class="fig-label">Fig. 6.</span> Logarithmic-function examples solved with golden-section search.</figcaption></figure>
+        <figure><img src="./part1/media/rational_newton_steps.png" alt="Rational-function Newton-Raphson results" loading="lazy"><figcaption><span class="fig-label">Fig. 7.</span> Variable-denominator examples solved with Newton–Raphson.</figcaption></figure>
+        <figure><img src="./part1/media/rational_golden_section_steps.png" alt="Rational-function golden-section results" loading="lazy"><figcaption><span class="fig-label">Fig. 8.</span> Variable-denominator examples solved with golden-section search.</figcaption></figure>
+        <figure><img src="./part1/media/radical_newton_steps.png" alt="Radical-function Newton-Raphson results" loading="lazy"><figcaption><span class="fig-label">Fig. 9.</span> Radical-function examples solved with Newton–Raphson.</figcaption></figure>
+        <figure><img src="./part1/media/radical_golden_section_steps.png" alt="Radical-function golden-section results" loading="lazy"><figcaption><span class="fig-label">Fig. 10.</span> Radical-function examples solved with golden-section search.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="part-two">
+      <h2>V. Part II — Least-Squares Function Fitting</h2>
+      <p class="no-indent">The second task fits a line and a parabola to \((0,0.5)\), \((1,1.5)\), \((2,3.5)\), and \((3,7.5)\). For a model prediction \(\hat y(x_i)\), let \(e_i=\hat y(x_i)-y_i\). The sum of squared errors is \(\rho=\sum_{i=1}^{4}e_i^2\), and \(\mathrm{MSE}=\rho/4\). Since MSE differs from SSE only by a positive constant, both objectives have the same optimal coefficients.</p>
+    </section>
+
+    <section id="p2-analytical">
+      <h2>VI. Analytical Least-Squares Solutions</h2>
+      <h3>A. Straight-Line Model</h3>
+      <p class="no-indent">For \(\hat y=c_0+c_1x\), setting the two partial derivatives of the SSE to zero gives \(4c_0+6c_1=13\) and \(6c_0+14c_1=31\). Solving the simultaneous equations produces \(c_0=-0.2\) and \(c_1=2.3\).</p>
+      <div class="result-box">\[\boxed{\hat y=2.3x-0.2},\qquad \mathrm{SSE}=2.30,\qquad \mathrm{MSE}=0.575.\]</div>
+
+      <h3>B. Quadratic Model</h3>
+      <p class="no-indent">For \(\hat y=c_0+c_1x+c_2x^2\), the stationary equations are \(4c_0+6c_1+14c_2=13\), \(6c_0+14c_1+36c_2=31\), and \(14c_0+36c_1+98c_2=83\). Their solution is \(c_0=0.55\), \(c_1=0.05\), and \(c_2=0.75\).</p>
+      <div class="result-box">\[\boxed{\hat y=0.75x^2+0.05x+0.55},\qquad \mathrm{SSE}=0.05,\qquad \mathrm{MSE}=0.0125.\]</div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>Table IV. Comparison of the analytical least-squares models</caption>
+          <thead><tr><th>Model</th><th>Best-fit equation</th><th>SSE</th><th>MSE</th></tr></thead>
+          <tbody>
+            <tr><td>Line</td><td>\(\hat y=2.3x-0.2\)</td><td>2.30</td><td>0.575</td></tr>
+            <tr><td>Parabola</td><td>\(\hat y=0.75x^2+0.05x+0.55\)</td><td>0.05</td><td>0.0125</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The quadratic model has the lower MSE because its additional coefficient represents the curvature in the four observations. In matrix form, both analytical calculations satisfy the normal equation \(A^TA\mathbf c=A^T\mathbf y\).</p>
+    </section>
+
+    <section id="p2-newton">
+      <h2>VII. Coordinate-Wise Newton–Raphson</h2>
+      <p class="no-indent">The numerical solution begins with every coefficient equal to zero. Within each sweep, one coefficient is optimized while all other coefficients are held at their newest available values. For design-matrix column \(A_j\), the coordinate update is</p>
+      <div class="equation">
+        \[c_j^{\mathrm{new}}=c_j^{\mathrm{old}}-\frac{2A_j^T(A\mathbf c-\mathbf y)}{2A_j^TA_j}.\]
+      </div>
+      <p>For the line, the intercept and slope updates are \(c_0\leftarrow(26-12c_1)/8\), followed by \(c_1\leftarrow(62-12c_0)/28\). For the parabola, the sequential updates are \(c_0\leftarrow(26-12c_1-28c_2)/8\), \(c_1\leftarrow(62-12c_0-72c_2)/28\), and \(c_2\leftarrow(166-28c_0-72c_1)/196\). Iteration stops when the largest coefficient change in a sweep is below \(10^{-10}\).</p>
+
+      <div class="downloads">
+        <a href="./part2/part2_newton.py">View Part II code</a>
+        <a href="./part2/part2_newton.py" download>Download Part II code</a>
+        <a href="./part2/media/line_newton_iterations.csv" download>Line iterations</a>
+        <a href="./part2/media/parabola_newton_iterations.csv" download>Parabola iterations</a>
+      </div>
+
+      <div class="figure-grid">
+        <figure>
+          <img src="./part2/media/part2_line_newton_steps.png" alt="Coordinate-wise Newton iterations for the straight-line fit" loading="lazy">
+          <figcaption><span class="fig-label">Fig. 11.</span> Intermediate line fits and MSE convergence. The method reaches \(c_0=-0.2\), \(c_1=2.3\), and MSE \(0.575\) after 55 sweeps.</figcaption>
+        </figure>
+        <figure>
+          <img src="./part2/media/part2_parabola_newton_steps.png" alt="Coordinate-wise Newton iterations for the quadratic fit" loading="lazy">
+          <figcaption><span class="fig-label">Fig. 12.</span> Intermediate quadratic fits and MSE convergence. The method reaches \((c_0,c_1,c_2)=(0.55,0.05,0.75)\) and MSE \(0.0125\) after 591 sweeps.</figcaption>
+        </figure>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>Table V. Selected coordinate-wise Newton–Raphson states</caption>
+          <thead><tr><th>Model</th><th>Sweep</th><th>Coefficients</th><th>SSE</th><th>MSE</th></tr></thead>
+          <tbody>
+            <tr><td>Line</td><td>0</td><td>\((0,0)\)</td><td>71.000000</td><td>17.750000</td></tr>
+            <tr><td>Line</td><td>10</td><td>\((-0.135308,2.272275)\)</td><td>2.305979</td><td>0.576495</td></tr>
+            <tr><td>Line</td><td>55</td><td>\((-0.200000,2.300000)\)</td><td>2.300000</td><td>0.575000</td></tr>
+            <tr><td>Parabola</td><td>0</td><td>\((0,0,0)\)</td><td>71.000000</td><td>17.750000</td></tr>
+            <tr><td>Parabola</td><td>50</td><td>\((0.384549,0.409855,0.641444)\)</td><td>0.103107</td><td>0.025777</td></tr>
+            <tr><td>Parabola</td><td>591</td><td>\((0.550000,0.050000,0.750000)\)</td><td>0.050000</td><td>0.012500</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>VIII. Conclusion</h2>
+      <p class="no-indent">For Part I, analytical differentiation, Newton–Raphson, and golden-section search agree for every supplied point. Strict convexity of the parabola squared-distance objective establishes that each reported stationary point is the unique global minimum. The non-polynomial examples show how the same numerical interfaces extend to functions with different domains and derivative behavior.</p>
+      <p>For Part II, the analytical normal equations and coordinate-wise Newton–Raphson produce the same fitted coefficients and MSE values. The quadratic fit reduces the MSE from \(0.575\) to \(0.0125\). The numerical implementation directly satisfies the required alternating optimization procedure by updating one model coefficient at a time while holding the remaining coefficients fixed.</p>
+    </section>
+
+    <section class="pdf-section" id="files">
+      <h2>IX. Handwritten Work and Supporting Files</h2>
+      <p class="no-indent">The handwritten derivations are embedded for direct comparison with the typed report. Each document can also be opened in a separate tab.</p>
+      <h3>A. Part I Handwritten Solution</h3>
+      <p class="no-indent small"><a href="./part1/part1.pdf">Open or download the Part I handwritten PDF.</a></p>
+      <object class="pdf-frame" data="./part1/part1.pdf" type="application/pdf" aria-label="Part I handwritten analytical solution">
+        <p>Your browser cannot display this PDF. <a href="./part1/part1.pdf">Open Part I handwritten solution</a>.</p>
+      </object>
+      <h3>B. Part II Handwritten Solution</h3>
+      <p class="no-indent small"><a href="./part2/part2.pdf">Open or download the Part II handwritten PDF.</a></p>
+      <object class="pdf-frame" data="./part2/part2.pdf" type="application/pdf" aria-label="Part II handwritten analytical solution">
+        <p>Your browser cannot display this PDF. <a href="./part2/part2.pdf">Open Part II handwritten solution</a>.</p>
+      </object>
+    </section>
+
+    <section>
+      <h2>References</h2>
+      <ol class="references">
+        <li>SYDE 572, “Assignment 1,” course assignment document. <a href="./SYDE572 assn1.pdf">View assignment PDF.</a></li>
+        <li>Part I Python implementations: <a href="./part1/A1.py">Newton–Raphson</a>, <a href="./part1/A2.py">golden-section search</a>, and <a href="./part1/non_polynomial_examples.py">non-polynomial examples</a>.</li>
+        <li>Part II Python implementation: <a href="./part2/part2_newton.py">coordinate-wise Newton–Raphson</a>.</li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>
